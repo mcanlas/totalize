@@ -18,7 +18,7 @@ object ProjectPlugin extends AutoPlugin {
 
   object ThingsToAutoImport {
     private def jarName(s: String) =
-      "temporal-diagrams-" + s
+      "totalize-" + s
 
     def module(s: String): Project =
       Project(s, file(jarName(s)))
