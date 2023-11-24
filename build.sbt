@@ -16,6 +16,7 @@ lazy val tConsole =
     .dependsOn(core)
     .settings(
       console / initialCommands := Seq(
+        "import com.htmlism.totalize.console.*",
         "import com.htmlism.totalize.console.dsl.*",
         "import cats.effect.unsafe.implicits.global"
       )

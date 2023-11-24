@@ -1,5 +1,8 @@
 package com.htmlism.totalize.console
 
+import cats.Order
+import cats.effect.IO
+
 package object dsl:
   val states: List[String] = List(
     "Alabama",
@@ -54,5 +57,8 @@ package object dsl:
     "Wyoming"
   )
 
-  def session[A](xs: A*): Unit =
-    ()
+  def session[A: Order](xs: List[A]): IO[InteractiveSessionState[IO]] =
+    InteractiveSessionState.sync[IO, A](xs)
+
+  def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime) =
+    S.printCurrentPair.unsafeRunSync()

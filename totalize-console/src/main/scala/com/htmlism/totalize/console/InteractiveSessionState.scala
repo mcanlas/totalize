@@ -11,10 +11,10 @@ trait InteractiveSessionState[F[_]]:
 
 object InteractiveSessionState:
   class SyncInteractiveSessionState[F[_]: Sync, A: Order](
+      population: List[A],
       rng: std.Random[F],
       seedRef: Ref[F, Int],
-      val population: List[A],
-      val prefs: PreferenceRelation[A]
+      val prefs: Ref[F, PreferenceRelation[A]]
   )(using out: std.Console[F])
       extends InteractiveSessionState[F]:
     assert(population.size > 1, "Population must be at least 2")
@@ -38,11 +38,11 @@ object InteractiveSessionState:
 
   def sync[F[_]: Sync: std.Console, A: Order](population: List[A]): F[InteractiveSessionState[F]] =
     for
-      rng  <- std.Random.scalaUtilRandom[F]
-      refN <- Ref[F].of(0)
+      rng      <- std.Random.scalaUtilRandom[F]
+      refN     <- Ref[F].of(0)
+      refPrefs <- Ref[F].of(PreferenceRelation.empty[A])
 
-      state = SyncInteractiveSessionState(rng, refN, population, PreferenceRelation.empty[A])
+      state = SyncInteractiveSessionState(population, rng, refN, refPrefs)
 
       _ <- state.updateSeed
-      _ <- state.printCurrentPair
     yield state
