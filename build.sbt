@@ -7,13 +7,6 @@ lazy val core =
     .withCats
     .withTesting
     .settings(description := "A framework for generating total orderings")
-    .settings(
-      console / initialCommands := Seq(
-        "import com.htmlism.totalize.console.dsl.*",
-        "import cats.effect.unsafe.implicits.global"
-      )
-        .mkString(";")
-    )
 
 lazy val tConsole =
   module("console")
@@ -21,3 +14,10 @@ lazy val tConsole =
     .withTesting
     .settings(description := "Tools for refining preferences using the Scala console")
     .dependsOn(core)
+    .settings(
+      console / initialCommands := Seq(
+        "import com.htmlism.totalize.console.dsl.*",
+        "import cats.effect.unsafe.implicits.global"
+      )
+        .mkString(";")
+    )
