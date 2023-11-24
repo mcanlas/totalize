@@ -15,6 +15,9 @@ object InteractiveSessionState:
   def sync[F[_]: Sync]: F[InteractiveSessionState[F]] =
     for
       rng  <- std.Random.scalaUtilRandom[F]
-      n    <- rng.nextInt
-      refN <- Ref[F].of(n)
-    yield SyncInteractiveSessionState(rng, refN)
+      refN <- Ref[F].of(0)
+
+      state = SyncInteractiveSessionState(rng, refN)
+
+      _ <- state.updateSeed
+    yield state
