@@ -7,6 +7,9 @@ lazy val core =
     .withCats
     .withTesting
     .settings(description := "A framework for generating total orderings")
+    .settings(
+      console / initialCommands := "import com.htmlism.totalize.console.dsl.*"
+    )
 
 lazy val console =
   module("console")
