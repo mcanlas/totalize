@@ -60,5 +60,14 @@ package object dsl:
   def session[A: Order](xs: List[A]): IO[InteractiveSessionState[IO]] =
     InteractiveSessionState.sync[IO, A](xs)
 
-  def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime) =
+  def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
     S.printCurrentPair.unsafeRunSync()
+
+  def a(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+    S.preferFirst.unsafeRunSync()
+
+  def d(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+    S.preferSecond.unsafeRunSync()
+
+  def dump(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+    S.dump.unsafeRunSync()
