@@ -24,3 +24,6 @@ object PreferenceRelation:
 
       def combine(x: PreferenceRelation[A], y: PreferenceRelation[A]): PreferenceRelation[A] =
         PreferenceRelation(x.xs ++ y.xs)
+
+  def empty[A]: PreferenceRelation[A] =
+    Monoid[PreferenceRelation[A]].empty

@@ -1,6 +1,6 @@
 lazy val root =
   Project("totalize", file("."))
-    .aggregate(core, console)
+    .aggregate(core, tConsole)
 
 lazy val core =
   module("core")
@@ -15,8 +15,9 @@ lazy val core =
         .mkString(";")
     )
 
-lazy val console =
+lazy val tConsole =
   module("console")
     .withEffectMonad
     .withTesting
     .settings(description := "Tools for refining preferences using the Scala console")
+    .dependsOn(core)
