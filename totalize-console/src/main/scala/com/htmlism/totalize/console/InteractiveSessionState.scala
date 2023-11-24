@@ -13,11 +13,15 @@ object InteractiveSessionState:
       rng: std.Random[F],
       seed: Ref[F, Int],
       val xs: PreferenceRelation[A]
-  ) extends InteractiveSessionState[F]:
+  )(using out: std.Console[F])
+      extends InteractiveSessionState[F]:
     def updateSeed: F[Unit] =
       rng.nextInt >>= seed.set
 
-  def sync[F[_]: Sync, A]: F[InteractiveSessionState[F]] =
+    def printCurrentPair: F[Unit] =
+      out.println("")
+
+  def sync[F[_]: Sync: std.Console, A]: F[InteractiveSessionState[F]] =
     for
       rng  <- std.Random.scalaUtilRandom[F]
       refN <- Ref[F].of(0)
