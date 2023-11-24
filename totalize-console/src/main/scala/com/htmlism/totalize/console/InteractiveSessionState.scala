@@ -44,16 +44,22 @@ object InteractiveSessionState:
       for
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.First))
-        _    <- updateSeed
-        _    <- printCurrentPair
+
+        _ <- updateSeed
+        _ <- runTournament
+
+        _ <- printCurrentPair
       yield ()
 
     def preferSecond: F[Unit] =
       for
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.Second))
-        _    <- updateSeed
-        _    <- printCurrentPair
+
+        _ <- updateSeed
+        _ <- runTournament
+
+        _ <- printCurrentPair
       yield ()
 
     def printCurrentPair: F[Unit] =
@@ -71,6 +77,12 @@ object InteractiveSessionState:
           .toList
           .map(_.toString)
           .traverse(out.println)
+      yield ()
+
+    def runTournament: F[Unit] =
+      for
+        is <- TotalIndexGenerator.generateN[F, A](rng.shuffleList, population, 5)
+        _  <- is.traverse(idx => out.println(idx.toString))
       yield ()
 
   def sync[F[_]: Sync: std.Console, A: Order](population: List[A]): F[InteractiveSessionState[F]] =
