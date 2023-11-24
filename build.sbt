@@ -8,11 +8,15 @@ lazy val core =
     .withTesting
     .settings(description := "A framework for generating total orderings")
     .settings(
-      console / initialCommands := "import com.htmlism.totalize.console.dsl.*"
+      console / initialCommands := Seq(
+        "import com.htmlism.totalize.console.dsl.*",
+        "import cats.effect.unsafe.implicits.global"
+      )
+        .mkString(";")
     )
 
 lazy val console =
   module("console")
-    .withCats
+    .withEffectMonad
     .withTesting
     .settings(description := "Tools for refining preferences using the Scala console")
