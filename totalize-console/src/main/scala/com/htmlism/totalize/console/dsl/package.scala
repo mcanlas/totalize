@@ -57,6 +57,9 @@ package object dsl:
     "Wyoming"
   )
 
+  val planets: List[String] =
+    List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
+
   def session[A: Order](xs: List[A]): IO[InteractiveSessionState[IO]] =
     InteractiveSessionState.sync[IO, A](xs)
 
@@ -71,3 +74,6 @@ package object dsl:
 
   def dump(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
     S.dump.unsafeRunSync()
+
+  def dumpPuml(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+    S.dumpPuml.unsafeRunSync()

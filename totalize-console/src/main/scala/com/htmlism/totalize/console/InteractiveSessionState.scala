@@ -15,6 +15,8 @@ trait InteractiveSessionState[F[_]]:
 
   def dump: F[Unit]
 
+  def dumpPuml: F[Unit]
+
 object InteractiveSessionState:
   class SyncInteractiveSessionState[F[_]: Sync, A: Order](
       population: List[A],
@@ -79,10 +81,36 @@ object InteractiveSessionState:
           .traverse(out.println)
       yield ()
 
+    def dumpPuml: F[Unit] =
+      for
+        prefs <- prefRef.get
+        _ <- prefs
+          .xs
+          .toList
+          .map:
+            case (Pair(x, y), rel) =>
+              rel match
+                case BinaryPreference.First =>
+                  s"${x.toString} --> ${y.toString}"
+
+                case BinaryPreference.Second =>
+                  s"${y.toString} --> ${x.toString}"
+          .traverse(out.println)
+      yield ()
+
     def runTournament: F[Unit] =
       for
-        is <- TotalIndexGenerator.generateN[F, A](rng.shuffleList, population, 5)
-        _  <- is.traverse(idx => out.println(idx.toString))
+        prefs <- prefRef.get
+
+        is <- TotalIndexGenerator.generateN[F, A](rng.shuffleList, population, prefs.xs.size * 2)
+
+        withScores = is.fproduct(idx => TotalIndexFitness.score(idx, prefs))
+
+        _ <- withScores
+          .sortBy(_._2)
+          .takeRight(3)
+          .traverse: idx =>
+            out.println(idx.toString) *> out.println("")
       yield ()
 
   def sync[F[_]: Sync: std.Console, A: Order](population: List[A]): F[InteractiveSessionState[F]] =
