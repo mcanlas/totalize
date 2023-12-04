@@ -5,15 +5,13 @@ import cats.syntax.all.*
 
 import com.htmlism.totalize.storage.FileIO.*
 
-class YamlTableService[F[_]: Monad, A](path: String)(using R: Reader[F], W: Writer[F]):
-  (path, R, W)
-
+class YamlTableService[F[_]: FlatMap, A](path: String)(using R: Reader[F], W: Writer[F]):
   def read: F[List[A]] =
-    for _ <- Monad[F].unit
+    for _ <- R.readString(path)
     yield Nil
 
   def write(xs: List[A]): F[Unit] =
-    for _ <- Monad[F].unit
+    for _ <- W.writeLines(path, Nil)
     yield ()
 
   def addOne(x: A): F[Unit] =
