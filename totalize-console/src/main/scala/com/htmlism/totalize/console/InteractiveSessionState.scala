@@ -5,7 +5,7 @@ import cats.effect.*
 import cats.syntax.all.*
 
 import com.htmlism.totalize.core.*
-import com.htmlism.totalize.storage.FileWriter
+import com.htmlism.totalize.storage.FileIO
 
 trait InteractiveSessionState[F[_]]:
   def printCurrentPair: F[Unit]
@@ -98,7 +98,7 @@ object InteractiveSessionState:
                   s"[${y.toString}] --> [${x.toString}]"
           .prepended("@startuml")
           .appended("@enduml")
-        _ <- FileWriter.sync[F].writeLines("planets.puml", lines)
+        _ <- FileIO.Writer.sync[F].writeLines("planets.puml", lines)
       yield ()
 
     def runTournament: F[Unit] =
