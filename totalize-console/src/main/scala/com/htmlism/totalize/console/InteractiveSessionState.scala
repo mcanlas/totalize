@@ -118,11 +118,11 @@ object InteractiveSessionState:
 
   def sync[F[_]: Sync: std.Console, A: Order](population: List[A]): F[InteractiveSessionState[F]] =
     for
-      rng      <- std.Random.scalaUtilRandom[F]
-      refN     <- Ref[F].of(0)
-      refPrefs <- Ref[F].of(PreferenceRelation.empty[A])
+      rng             <- std.Random.scalaUtilRandom[F]
+      startSeed       <- Ref[F].of(0)
+      startPrefsEmpty <- Ref[F].of(PreferenceRelation.empty[A])
 
-      state = SyncInteractiveSessionState(population, rng, refN, refPrefs)
+      state = SyncInteractiveSessionState(population, rng, startSeed, startPrefsEmpty)
 
       _ <- state.updateSeed
     yield state

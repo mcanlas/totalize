@@ -2,6 +2,9 @@ package com.htmlism.totalize.console
 
 import cats.Order
 import cats.effect.IO
+import io.circe.*
+
+import com.htmlism.totalize.storage.*
 
 package object dsl:
   val states: List[String] = List(
@@ -61,7 +64,8 @@ package object dsl:
     List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
   def session[A: Order](xs: List[A]): IO[InteractiveSessionState[IO]] =
-    InteractiveSessionState.sync[IO, A](xs)
+    YamlTableService[IO, String]("history.yaml", FileIO.Reader.sync, FileIO.Writer.sync).read *>
+      InteractiveSessionState.sync[IO, A](xs)
 
   def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
     S.printCurrentPair.unsafeRunSync()
