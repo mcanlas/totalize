@@ -56,6 +56,13 @@ object ProjectPlugin extends AutoPlugin {
           )
         )
       }
+
+      def withYaml: Project =
+        p.settings(
+          libraryDependencies ++= Seq(
+            "io.circe" %% "circe-yaml" % "0.15.1"
+          )
+        )
     }
   }
 }

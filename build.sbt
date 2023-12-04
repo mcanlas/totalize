@@ -27,4 +27,5 @@ lazy val storage =
   module("storage")
     .settings(description := "Support for persisting user data")
     .withEffectMonad
+    .withYaml
     .dependsOn(core)
