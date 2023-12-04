@@ -23,7 +23,7 @@ object InteractiveSessionState:
       population: List[A],
       rng: std.Random[F],
       seedRef: Ref[F, Int],
-      prefRef: Ref[F, PreferenceRelation[A]]
+      prefRef: Ref[F, PartialOrder[A]]
   )(using out: std.Console[F])
       extends InteractiveSessionState[F]:
     assert(population.size > 1, "Population must be at least 2")
@@ -120,7 +120,7 @@ object InteractiveSessionState:
     for
       rng             <- std.Random.scalaUtilRandom[F]
       startSeed       <- Ref[F].of(0)
-      startPrefsEmpty <- Ref[F].of(PreferenceRelation.empty[A])
+      startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
 
       state = SyncInteractiveSessionState(population, rng, startSeed, startPrefsEmpty)
 

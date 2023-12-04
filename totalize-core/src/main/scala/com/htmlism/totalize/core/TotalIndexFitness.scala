@@ -1,7 +1,7 @@
 package com.htmlism.totalize.core
 
 object TotalIndexFitness:
-  def score[A](index: TotalIndex[A], prefs: PreferenceRelation[A]): Int =
+  def score[A](index: TotalIndex[A], prefs: PartialOrder[A]): Int =
     val order =
       index.toOrder
 
