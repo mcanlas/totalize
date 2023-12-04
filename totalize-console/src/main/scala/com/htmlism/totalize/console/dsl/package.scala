@@ -67,13 +67,10 @@ package object dsl:
     S.printCurrentPair.unsafeRunSync()
 
   def a(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
-    S.preferFirst.unsafeRunSync()
+    (S.preferFirst *> S.writePuml).unsafeRunSync()
 
   def d(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
-    S.preferSecond.unsafeRunSync()
+    (S.preferSecond *> S.writePuml).unsafeRunSync()
 
   def dump(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
     S.dump.unsafeRunSync()
-
-  def dumpPuml(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
-    S.dumpPuml.unsafeRunSync()

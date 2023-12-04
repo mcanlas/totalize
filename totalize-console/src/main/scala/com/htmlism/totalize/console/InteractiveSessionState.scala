@@ -5,6 +5,7 @@ import cats.effect.*
 import cats.syntax.all.*
 
 import com.htmlism.totalize.core.*
+import com.htmlism.totalize.storage.FileWriter
 
 trait InteractiveSessionState[F[_]]:
   def printCurrentPair: F[Unit]
@@ -15,7 +16,7 @@ trait InteractiveSessionState[F[_]]:
 
   def dump: F[Unit]
 
-  def dumpPuml: F[Unit]
+  def writePuml: F[Unit]
 
 object InteractiveSessionState:
   class SyncInteractiveSessionState[F[_]: Sync, A: Order](
@@ -81,21 +82,23 @@ object InteractiveSessionState:
           .traverse(out.println)
       yield ()
 
-    def dumpPuml: F[Unit] =
+    def writePuml: F[Unit] =
       for
         prefs <- prefRef.get
-        _ <- prefs
+        lines = prefs
           .xs
           .toList
           .map:
             case (Pair(x, y), rel) =>
               rel match
                 case BinaryPreference.First =>
-                  s"${x.toString} --> ${y.toString}"
+                  s"[${x.toString}] --> [${y.toString}]"
 
                 case BinaryPreference.Second =>
-                  s"${y.toString} --> ${x.toString}"
-          .traverse(out.println)
+                  s"[${y.toString}] --> [${x.toString}]"
+          .prepended("@startuml")
+          .appended("@enduml")
+        _ <- FileWriter.sync[F].writeLines("planets.puml", lines)
       yield ()
 
     def runTournament: F[Unit] =
