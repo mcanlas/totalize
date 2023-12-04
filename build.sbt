@@ -1,6 +1,6 @@
 lazy val root =
   Project("totalize", file("."))
-    .aggregate(core, tConsole)
+    .aggregate(core, consoleSubProject, storage)
 
 lazy val core =
   module("core")
@@ -8,12 +8,12 @@ lazy val core =
     .withTesting
     .settings(description := "A framework for generating total orderings")
 
-lazy val tConsole =
+lazy val consoleSubProject =
   module("console")
     .withEffectMonad
     .withTesting
     .settings(description := "Tools for refining preferences using the Scala console")
-    .dependsOn(core)
+    .dependsOn(core, storage)
     .settings(
       console / initialCommands := Seq(
         "import com.htmlism.totalize.console.*",
@@ -22,3 +22,9 @@ lazy val tConsole =
       )
         .mkString(";")
     )
+
+lazy val storage =
+  module("storage")
+    .settings(description := "Support for persisting user data")
+    .withEffectMonad
+    .dependsOn(core)
