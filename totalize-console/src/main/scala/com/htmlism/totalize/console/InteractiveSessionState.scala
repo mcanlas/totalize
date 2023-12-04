@@ -1,8 +1,8 @@
 package com.htmlism.totalize.console
 
-import cats.*
 import cats.effect.*
 import cats.syntax.all.*
+import cats.{PartialOrder as _, *}
 
 import com.htmlism.totalize.core.*
 import com.htmlism.totalize.storage.FileIO
@@ -87,9 +87,10 @@ object InteractiveSessionState:
         prefs <- prefRef.get
         lines = prefs
           .xs
+          .values
           .toList
           .map:
-            case (Pair(x, y), rel) =>
+            case PartialOrder.Edge(Pair(x, y), rel) =>
               rel match
                 case BinaryPreference.First =>
                   s"[${x.toString}] --> [${y.toString}]"

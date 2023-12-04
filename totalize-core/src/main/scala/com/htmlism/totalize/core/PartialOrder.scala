@@ -12,11 +12,13 @@ import cats.Monoid
   * @param xs
   * @tparam A
   */
-case class PartialOrder[A](xs: Map[Pair[A], BinaryPreference]):
+case class PartialOrder[A](xs: Map[Pair[A], PartialOrder.Edge[A]]):
   def withPreference(pair: Pair[A], pref: BinaryPreference): PartialOrder[A] =
-    PartialOrder(xs.updated(pair, pref))
+    PartialOrder(xs.updated(pair, PartialOrder.Edge(pair, pref)))
 
 object PartialOrder:
+  case class Edge[A](pair: Pair[A], pref: BinaryPreference)
+
   given [A]: Monoid[PartialOrder[A]] =
     new Monoid[PartialOrder[A]]:
       def empty: PartialOrder[A] =
