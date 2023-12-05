@@ -3,11 +3,13 @@ package com.htmlism.totalize.console
 import cats.effect.*
 import cats.syntax.all.*
 import cats.{PartialOrder as _, *}
+import io.circe.*
 
 import com.htmlism.totalize.core.*
 import com.htmlism.totalize.storage
 import com.htmlism.totalize.storage.FileIO
 import com.htmlism.totalize.storage.HistoricalEntry
+import com.htmlism.totalize.storage.YamlTableService
 
 trait InteractiveSessionState[F[_]]:
   def printCurrentPair: F[Unit]
@@ -123,11 +125,42 @@ object InteractiveSessionState:
             out.println(idx.toString) *> out.println("")
       yield ()
 
-  def sync[F[_]: Sync: std.Console, A: Order](population: List[A]): F[InteractiveSessionState[F]] =
+  def sync[F[_]: Sync: std.Console, A: Order](population: List[A], path: String): F[InteractiveSessionState[F]] =
+//    given Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
+//      def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
+//        Json.Null
+//
+//    given Decoder[BinaryPreference] =
+//      Decoder[Int].emap:
+//        case -1 =>
+//          BinaryPreference.First.asRight
+//        case 1 =>
+//          BinaryPreference.Second.asRight
+//        case n =>
+//          s"number $n was not valid for comparison contract".asLeft
+
+//    given Decoder[Pair[A]] =
+//      Decoder[List[A]].emap:
+//        case List(x, y) =>
+//          Pair.from(x, y).leftMap(_.toString)
+//
+//
+//    given Decoder[HistoricalEntry[PartialOrder.Edge[A]]] with
+//      def apply(c: HCursor): Decoder.Result[HistoricalEntry[PartialOrder.Edge[A]]] =
+//        for
+//          xs <- c.downField("pair").as[List[String]]
+//          pref <- c.downField("preference").as[BinaryPreference]
+//          createdAt <- c.downField("createdAt").as[Long]
+//        yield HistoricalEntry(PartialOrder.Edge())
+
     for
       rng             <- std.Random.scalaUtilRandom[F]
       startSeed       <- Ref[F].of(0)
       startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
+
+      yaml = YamlTableService[F, String](path, FileIO.Reader.sync, FileIO.Writer.sync)
+
+      _ = yaml.read
 
       // TODO the first value should be read from the file system
       historicalEdges <- Ref[F].of(List.empty[HistoricalEntry[PartialOrder.Edge[A]]])
