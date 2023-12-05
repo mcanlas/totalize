@@ -5,7 +5,9 @@ import cats.syntax.all.*
 import cats.{PartialOrder as _, *}
 
 import com.htmlism.totalize.core.*
+import com.htmlism.totalize.storage
 import com.htmlism.totalize.storage.FileIO
+import com.htmlism.totalize.storage.HistoricalEntry
 
 trait InteractiveSessionState[F[_]]:
   def printCurrentPair: F[Unit]
@@ -23,10 +25,14 @@ object InteractiveSessionState:
       population: List[A],
       rng: std.Random[F],
       seedRef: Ref[F, Int],
-      prefRef: Ref[F, PartialOrder[A]]
+      prefRef: Ref[F, PartialOrder[A]],
+      historicalEdges: Ref[F, List[HistoricalEntry[PartialOrder.Edge[A]]]]
   )(using out: std.Console[F])
       extends InteractiveSessionState[F]:
     assert(population.size > 1, "Population must be at least 2")
+
+    val _ =
+      historicalEdges
 
     def updateSeed: F[Unit] =
       rng.nextInt >>= seedRef.set
@@ -123,7 +129,10 @@ object InteractiveSessionState:
       startSeed       <- Ref[F].of(0)
       startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
 
-      state = SyncInteractiveSessionState(population, rng, startSeed, startPrefsEmpty)
+      // TODO the first value should be read from the file system
+      historicalEdges <- Ref[F].of(List.empty[HistoricalEntry[PartialOrder.Edge[A]]])
+
+      state = SyncInteractiveSessionState(population, rng, startSeed, startPrefsEmpty, historicalEdges)
 
       _ <- state.updateSeed
     yield state
