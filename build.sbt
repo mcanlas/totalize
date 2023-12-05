@@ -18,6 +18,7 @@ lazy val consoleSubProject =
       console / initialCommands := Seq(
         "import com.htmlism.totalize.console.*",
         "import com.htmlism.totalize.console.dsl.*",
+        "import cats.effect.*",
         "import cats.effect.unsafe.implicits.global"
       )
         .mkString(";")

@@ -63,9 +63,10 @@ package object dsl:
   val planets: List[String] =
     List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
-  def session[A: Order](xs: List[A]): IO[InteractiveSessionState[IO]] =
-    YamlTableService[IO, String]("history.yaml", FileIO.Reader.sync, FileIO.Writer.sync).read *>
-      InteractiveSessionState.sync[IO, A](xs)
+  def session[A: Order](xs: List[A], path: String)(using cats.effect.unsafe.IORuntime): InteractiveSessionState[IO] =
+    (YamlTableService[IO, String](path, FileIO.Reader.sync, FileIO.Writer.sync).read *>
+      InteractiveSessionState.sync[IO, A](xs))
+      .unsafeRunSync()
 
   def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
     S.printCurrentPair.unsafeRunSync()
