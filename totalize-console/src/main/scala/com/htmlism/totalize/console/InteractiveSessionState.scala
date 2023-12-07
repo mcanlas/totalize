@@ -172,10 +172,9 @@ object InteractiveSessionState:
         FileIO.Writer.sync
       )
 
-      _ = yaml.read
+      xs <- yaml.read
 
-      // TODO the first value should be read from the file system
-      historicalEdges <- Ref[F].of(List.empty[HistoricalEntry[PartialOrder.Edge[A]]])
+      historicalEdges <- Ref[F].of(xs)
 
       state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startPrefsEmpty, historicalEdges)
 
