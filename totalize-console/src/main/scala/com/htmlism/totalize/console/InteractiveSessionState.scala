@@ -4,6 +4,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import cats.{PartialOrder as _, *}
 import io.circe.*
+import io.circe.syntax.*
 
 import com.htmlism.totalize.core.*
 import com.htmlism.totalize.storage
@@ -23,10 +24,6 @@ trait InteractiveSessionState[F[_]]:
   def writePuml: F[Unit]
 
 object InteractiveSessionState:
-  given [A]: Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
-    def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
-      Json.Null
-
   given Decoder[BinaryPreference] =
     Decoder[Int].emap:
       case -1 =>
@@ -35,6 +32,19 @@ object InteractiveSessionState:
         BinaryPreference.Second.asRight
       case n =>
         s"number $n was not valid for comparison contract".asLeft
+
+  given Encoder[BinaryPreference] =
+    Encoder[Int].contramap:
+      case BinaryPreference.First  => -1
+      case BinaryPreference.Second => 1
+
+  given [A](using Encoder[A]): Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
+    def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
+      JsonObject(
+        "pair"       -> List(x.x.pair.x, x.x.pair.y).asJson,
+        "preference" -> x.x.pref.asJson,
+        "createdAt"  -> 0L.asJson
+      ).asJson
 
   given [A: Order](using Decoder[List[A]]): Decoder[Pair[A]] =
     Decoder[List[A]].emap:
