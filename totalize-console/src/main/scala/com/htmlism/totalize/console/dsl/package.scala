@@ -60,9 +60,11 @@ package object dsl:
   val planets: List[String] =
     List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
-  def session[A: Order](xs: List[A], path: String)(using cats.effect.unsafe.IORuntime): InteractiveSessionState[IO] =
+  def session[A: Order](xs: List[A], path: String, pumlPath: String)(using
+      cats.effect.unsafe.IORuntime
+  ): InteractiveSessionState[IO] =
     InteractiveSessionState
-      .sync[IO, A](xs, path)
+      .sync[IO, A](xs, path, pumlPath: String)
       .unsafeRunSync()
 
   def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =

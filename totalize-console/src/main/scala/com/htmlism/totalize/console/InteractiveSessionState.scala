@@ -24,6 +24,7 @@ trait InteractiveSessionState[F[_]]:
 
 object InteractiveSessionState:
   class SyncInteractiveSessionState[F[_]: Sync, A: Order](
+      pumlPath: String,
       population: List[A],
       rng: std.Random[F],
       seedRef: Ref[F, Int],
@@ -107,7 +108,7 @@ object InteractiveSessionState:
                   s"[${y.toString}] --> [${x.toString}]"
           .prepended("@startuml")
           .appended("@enduml")
-        _ <- FileIO.Writer.sync[F].writeLines("planets.puml", lines)
+        _ <- FileIO.Writer.sync[F].writeLines(pumlPath, lines)
       yield ()
 
     def runTournament: F[Unit] =
@@ -125,7 +126,11 @@ object InteractiveSessionState:
             out.println(idx.toString) *> out.println("")
       yield ()
 
-  def sync[F[_]: Sync: std.Console, A: Order](population: List[A], path: String): F[InteractiveSessionState[F]] =
+  def sync[F[_]: Sync: std.Console, A: Order](
+      population: List[A],
+      historicalPath: String,
+      pumlPath: String
+  ): F[InteractiveSessionState[F]] =
 //    given Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
 //      def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
 //        Json.Null
@@ -158,14 +163,14 @@ object InteractiveSessionState:
       startSeed       <- Ref[F].of(0)
       startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
 
-      yaml = YamlTableService[F, String](path, FileIO.Reader.sync, FileIO.Writer.sync)
+      yaml = YamlTableService[F, String](historicalPath, FileIO.Reader.sync, FileIO.Writer.sync)
 
       _ = yaml.read
 
       // TODO the first value should be read from the file system
       historicalEdges <- Ref[F].of(List.empty[HistoricalEntry[PartialOrder.Edge[A]]])
 
-      state = SyncInteractiveSessionState(population, rng, startSeed, startPrefsEmpty, historicalEdges)
+      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startPrefsEmpty, historicalEdges)
 
       _ <- state.updateSeed
     yield state
