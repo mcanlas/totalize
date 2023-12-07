@@ -24,7 +24,7 @@ class YamlTableService[F[_]: MonadThrow, A](path: String, R: Reader[F], W: Write
     val str =
       enc
         .apply(xs)
-        .noSpaces
+        .spaces2
 
     for _ <- W.writeLines(path, List(str))
     yield ()
