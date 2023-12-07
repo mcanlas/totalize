@@ -2,6 +2,7 @@ package com.htmlism.totalize.console
 
 import cats.Order
 import cats.effect.IO
+import io.circe.*
 
 package object dsl:
   val states: List[String] = List(
@@ -60,11 +61,11 @@ package object dsl:
   val planets: List[String] =
     List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
-  def session[A: Order](xs: List[A], path: String, pumlPath: String)(using
+  def session[A: Order: Encoder: Decoder](xs: List[A], path: String, pumlPath: String)(using
       cats.effect.unsafe.IORuntime
   ): InteractiveSessionState[IO] =
     InteractiveSessionState
-      .sync[IO, A](xs, path, pumlPath: String)
+      .sync[IO, A](xs, path, pumlPath)
       .unsafeRunSync()
 
   def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =

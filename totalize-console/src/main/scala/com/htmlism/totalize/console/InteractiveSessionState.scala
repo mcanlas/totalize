@@ -23,6 +23,36 @@ trait InteractiveSessionState[F[_]]:
   def writePuml: F[Unit]
 
 object InteractiveSessionState:
+  given [A]: Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
+    def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
+      Json.Null
+
+  given Decoder[BinaryPreference] =
+    Decoder[Int].emap:
+      case -1 =>
+        BinaryPreference.First.asRight
+      case 1 =>
+        BinaryPreference.Second.asRight
+      case n =>
+        s"number $n was not valid for comparison contract".asLeft
+
+  given [A: Order](using Decoder[List[A]]): Decoder[Pair[A]] =
+    Decoder[List[A]].emap:
+      case List(x, y) =>
+        Pair.from(x, y).leftMap(_.toString)
+
+      case xs =>
+        Left:
+          s"Input list ${xs.toString} was not exactly length 2"
+
+  given [A](using Decoder[Pair[A]]): Decoder[HistoricalEntry[PartialOrder.Edge[A]]] with
+    def apply(c: HCursor): Decoder.Result[HistoricalEntry[PartialOrder.Edge[A]]] =
+      for
+        xs        <- c.downField("pair").as[Pair[A]]
+        pref      <- c.downField("preference").as[BinaryPreference]
+        createdAt <- c.downField("createdAt").as[Long]
+      yield HistoricalEntry(PartialOrder.Edge[A](xs, pref), createdAt)
+
   class SyncInteractiveSessionState[F[_]: Sync, A: Order](
       pumlPath: String,
       population: List[A],
@@ -126,44 +156,21 @@ object InteractiveSessionState:
             out.println(idx.toString) *> out.println("")
       yield ()
 
-  def sync[F[_]: Sync: std.Console, A: Order](
+  def sync[F[_]: Sync: std.Console, A: Order: Decoder: Encoder](
       population: List[A],
       historicalPath: String,
       pumlPath: String
   ): F[InteractiveSessionState[F]] =
-//    given Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
-//      def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
-//        Json.Null
-//
-//    given Decoder[BinaryPreference] =
-//      Decoder[Int].emap:
-//        case -1 =>
-//          BinaryPreference.First.asRight
-//        case 1 =>
-//          BinaryPreference.Second.asRight
-//        case n =>
-//          s"number $n was not valid for comparison contract".asLeft
-
-//    given Decoder[Pair[A]] =
-//      Decoder[List[A]].emap:
-//        case List(x, y) =>
-//          Pair.from(x, y).leftMap(_.toString)
-//
-//
-//    given Decoder[HistoricalEntry[PartialOrder.Edge[A]]] with
-//      def apply(c: HCursor): Decoder.Result[HistoricalEntry[PartialOrder.Edge[A]]] =
-//        for
-//          xs <- c.downField("pair").as[List[String]]
-//          pref <- c.downField("preference").as[BinaryPreference]
-//          createdAt <- c.downField("createdAt").as[Long]
-//        yield HistoricalEntry(PartialOrder.Edge())
-
     for
       rng             <- std.Random.scalaUtilRandom[F]
       startSeed       <- Ref[F].of(0)
       startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
 
-      yaml = YamlTableService[F, String](historicalPath, FileIO.Reader.sync, FileIO.Writer.sync)
+      yaml = YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]](
+        historicalPath,
+        FileIO.Reader.sync,
+        FileIO.Writer.sync
+      )
 
       _ = yaml.read
 
