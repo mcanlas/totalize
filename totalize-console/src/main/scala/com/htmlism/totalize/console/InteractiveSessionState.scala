@@ -59,7 +59,8 @@ object InteractiveSessionState:
       rng: std.Random[F],
       seedRef: Ref[F, Int],
       prefRef: Ref[F, PartialOrder[A]],
-      historicalEdges: Ref[F, List[HistoricalEntry[PartialOrder.Edge[A]]]]
+      historicalEdges: Ref[F, List[HistoricalEntry[PartialOrder.Edge[A]]]],
+      storage: YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]]
   )(using out: std.Console[F])
       extends InteractiveSessionState[F]:
     assert(population.size > 1, "Population must be at least 2")
@@ -86,6 +87,7 @@ object InteractiveSessionState:
 
         newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.First), 0L)
         _       <- historicalEdges.update(xs => newEntry :: xs)
+        _       <- storage.addOne(newEntry)
 
         _ <- updateSeed
         _ <- runTournament
@@ -100,6 +102,7 @@ object InteractiveSessionState:
 
         newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.Second), 0L)
         _       <- historicalEdges.update(xs => newEntry :: xs)
+        _       <- storage.addOne(newEntry)
 
         _ <- updateSeed
         _ <- runTournament
@@ -179,7 +182,7 @@ object InteractiveSessionState:
 
       historicalEdges <- Ref[F].of(xs)
 
-      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startPrefsEmpty, historicalEdges)
+      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startPrefsEmpty, historicalEdges, yaml)
 
       _ <- state.updateSeed
     yield state
