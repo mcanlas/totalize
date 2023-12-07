@@ -64,9 +64,6 @@ object InteractiveSessionState:
       extends InteractiveSessionState[F]:
     assert(population.size > 1, "Population must be at least 2")
 
-    val _ =
-      historicalEdges
-
     def updateSeed: F[Unit] =
       rng.nextInt >>= seedRef.set
 
@@ -87,6 +84,9 @@ object InteractiveSessionState:
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.First))
 
+        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.First), 0L)
+        _       <- historicalEdges.update(xs => newEntry :: xs)
+
         _ <- updateSeed
         _ <- runTournament
 
@@ -97,6 +97,9 @@ object InteractiveSessionState:
       for
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.Second))
+
+        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.Second), 0L)
+        _       <- historicalEdges.update(xs => newEntry :: xs)
 
         _ <- updateSeed
         _ <- runTournament
