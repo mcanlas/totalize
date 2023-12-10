@@ -29,8 +29,11 @@ class YamlTableService[F[_]: MonadThrow, A](path: String, R: Reader[F], W: Write
     for _ <- W.writeLines(path, List(str))
     yield ()
 
-  def addOne(x: A): F[Unit] =
+  def addOne(x: A): F[List[A]] =
     for
       old <- read
-      _   <- write(x :: old)
-    yield ()
+
+      everything = x :: old
+
+      _ <- write(everything)
+    yield everything
