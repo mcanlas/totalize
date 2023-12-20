@@ -192,7 +192,18 @@ object InteractiveSessionState:
 
       historicalEdges <- Ref[F].of(xs)
 
-      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startPrefsEmpty, historicalEdges, yaml)
+      startingPrefs <- Ref[F].of:
+        xs
+          .groupBy(_.x.pair)
+          .view
+          .mapValues(_.maxBy(_.millis))
+          .mapValues(_.x.pref)
+          .toList
+          .map: (a, b) =>
+            PartialOrder.empty.withPreference(a, b)
+          .combineAll
+
+      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startingPrefs, historicalEdges, yaml)
 
       _ <- state.updateSeed
     yield state
