@@ -19,7 +19,7 @@ object PublishPlugin extends AutoPlugin {
   override val buildSettings: Seq[Setting[?]] = Seq(
     organization  := "com.htmlism",
     versionScheme := Some("strict"),
-    publishTo     := Some("GitHub" at "https://maven.pkg.github.com/mcanlas/temporal-diagrams/"),
+    publishTo     := Some("GitHub" at "https://maven.pkg.github.com/mcanlas/totalize/"),
     credentials += Credentials(
       "GitHub Package Registry",
       "maven.pkg.github.com",
