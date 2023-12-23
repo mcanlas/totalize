@@ -7,6 +7,7 @@ lazy val core =
     .withCats
     .withTesting
     .settings(description := "A framework for generating total orderings")
+    .enablePublishing
 
 lazy val consoleSubProject =
   module("console")
@@ -30,3 +31,4 @@ lazy val storage =
     .withEffectMonad
     .withYaml
     .dependsOn(core)
+    .enablePublishing
