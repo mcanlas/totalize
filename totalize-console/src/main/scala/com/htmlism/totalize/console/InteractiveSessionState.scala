@@ -178,9 +178,8 @@ object InteractiveSessionState:
       pumlPath: String
   ): F[InteractiveSessionState[F]] =
     for
-      rng             <- std.Random.scalaUtilRandom[F]
-      startSeed       <- Ref[F].of(0)
-      startPrefsEmpty <- Ref[F].of(PartialOrder.empty[A])
+      rng       <- std.Random.scalaUtilRandom[F]
+      startSeed <- Ref[F].of(0)
 
       yaml = YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]](
         historicalPath,
