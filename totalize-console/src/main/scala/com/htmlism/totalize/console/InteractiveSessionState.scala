@@ -150,12 +150,18 @@ object InteractiveSessionState:
           .toList
           .map:
             case PartialOrder.Edge(Pair(x, y), rel) =>
+              val xSafe =
+                x.toString.replace("[", "").replace("]", "")
+
+              val ySafe =
+                y.toString.replace("[", "").replace("]", "")
+
               rel match
                 case BinaryPreference.First =>
-                  s"[${x.toString}] --> [${y.toString}]"
+                  s"[$xSafe] --> [$ySafe]"
 
                 case BinaryPreference.Second =>
-                  s"[${y.toString}] --> [${x.toString}]"
+                  s"[$ySafe] --> [$xSafe]"
           .prepended("@startuml")
           .appended("@enduml")
         _ <- FileIO.Writer.sync[F].writeLines(pumlPath, lines)
