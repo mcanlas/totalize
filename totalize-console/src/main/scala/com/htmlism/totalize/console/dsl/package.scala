@@ -63,19 +63,19 @@ package object dsl:
 
   def session[A: Order: Encoder: Decoder](xs: List[A], path: String, pumlPath: String)(using
       cats.effect.unsafe.IORuntime
-  ): InteractiveSessionState[IO] =
+  ): InteractiveSessionState[IO, A] =
     InteractiveSessionState
       .sync[IO, A](xs, path, pumlPath)
       .unsafeRunSync()
 
-  def ask(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+  def ask[A](using S: InteractiveSessionState[IO, A], R: cats.effect.unsafe.IORuntime): Unit =
     S.printCurrentPair.unsafeRunSync()
 
-  def a(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+  def a[A](using S: InteractiveSessionState[IO, A], R: cats.effect.unsafe.IORuntime): Unit =
     (S.preferFirst *> S.writePuml).unsafeRunSync()
 
-  def d(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+  def d[A](using S: InteractiveSessionState[IO, A], R: cats.effect.unsafe.IORuntime): Unit =
     (S.preferSecond *> S.writePuml).unsafeRunSync()
 
-  def dump(using S: InteractiveSessionState[IO], R: cats.effect.unsafe.IORuntime): Unit =
+  def dump[A](using S: InteractiveSessionState[IO, A], R: cats.effect.unsafe.IORuntime): Unit =
     S.dump.unsafeRunSync()

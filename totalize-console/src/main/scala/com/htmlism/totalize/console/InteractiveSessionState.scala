@@ -12,7 +12,9 @@ import com.htmlism.totalize.storage.FileIO
 import com.htmlism.totalize.storage.HistoricalEntry
 import com.htmlism.totalize.storage.YamlTableService
 
-trait InteractiveSessionState[F[_]]:
+trait InteractiveSessionState[F[_], A]:
+  def getCurrentPair: F[Pair[A]]
+
   def printCurrentPair: F[Unit]
 
   def preferFirst: F[Unit]
@@ -72,7 +74,7 @@ object InteractiveSessionState:
       historicalEdges: Ref[F, List[HistoricalEntry[PartialOrder.Edge[A]]]],
       storage: YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]]
   )(using out: std.Console[F])
-      extends InteractiveSessionState[F]:
+      extends InteractiveSessionState[F, A]:
     assert(population.size > 1, "Population must be at least 2")
 
     def updateSeed: F[Unit] =
@@ -186,7 +188,7 @@ object InteractiveSessionState:
       population: List[A],
       historicalPath: String,
       pumlPath: String
-  ): F[InteractiveSessionState[F]] =
+  ): F[InteractiveSessionState[F, A]] =
     for
       rng       <- std.Random.scalaUtilRandom[F]
       startSeed <- Ref[F].of(0)
