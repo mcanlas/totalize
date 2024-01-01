@@ -39,11 +39,11 @@ object InteractiveSessionState:
       case BinaryPreference.Second => 1
 
   given [A](using Encoder[A]): Encoder[HistoricalEntry[PartialOrder.Edge[A]]] with
-    def apply(x: HistoricalEntry[PartialOrder.Edge[A]]): Json =
+    def apply(hx: HistoricalEntry[PartialOrder.Edge[A]]): Json =
       JsonObject(
-        "pair"       -> List(x.x.pair.x, x.x.pair.y).asJson,
-        "preference" -> x.x.pref.asJson,
-        "createdAt"  -> 0L.asJson
+        "pair"       -> List(hx.x.pair.x, hx.x.pair.y).asJson,
+        "preference" -> hx.x.pref.asJson,
+        "createdAt"  -> hx.createdAtMillis.asJson
       ).asJson
 
   given [A: Order](using Decoder[List[A]]): Decoder[Pair[A]] =
@@ -63,7 +63,7 @@ object InteractiveSessionState:
         createdAt <- c.downField("createdAt").as[Long]
       yield HistoricalEntry(PartialOrder.Edge[A](xs, pref), createdAt)
 
-  class SyncInteractiveSessionState[F[_]: Sync, A: Order](
+  class SyncInteractiveSessionState[F[_]: Sync: Clock, A: Order](
       pumlPath: String,
       population: List[A],
       rng: std.Random[F],
@@ -95,7 +95,9 @@ object InteractiveSessionState:
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.First))
 
-        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.First), 0L)
+        now <- Clock[F].realTime.map(_.toMillis)
+
+        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.First), now)
         _       <- historicalEdges.update(xs => newEntry :: xs)
         _       <- storage.addOne(newEntry)
 
@@ -110,7 +112,9 @@ object InteractiveSessionState:
         pair <- getCurrentPair
         _    <- prefRef.update(_.withPreference(pair, BinaryPreference.Second))
 
-        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.Second), 0L)
+        now <- Clock[F].realTime.map(_.toMillis)
+
+        newEntry = HistoricalEntry(PartialOrder.Edge(pair, BinaryPreference.Second), now)
         _       <- historicalEdges.update(xs => newEntry :: xs)
         _       <- storage.addOne(newEntry)
 
@@ -195,7 +199,7 @@ object InteractiveSessionState:
         xs
           .groupBy(_.x.pair)
           .view
-          .mapValues(_.maxBy(_.millis))
+          .mapValues(_.maxBy(_.createdAtMillis))
           .mapValues(_.x.pref)
           .toList
           .map: (a, b) =>

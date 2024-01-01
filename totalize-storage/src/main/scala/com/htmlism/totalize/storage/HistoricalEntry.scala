@@ -4,4 +4,4 @@ object HistoricalEntry:
   trait Key[A, B]:
     def keyOf(x: A): B
 
-case class HistoricalEntry[A](x: A, millis: Long)
+case class HistoricalEntry[A](x: A, createdAtMillis: Long)
