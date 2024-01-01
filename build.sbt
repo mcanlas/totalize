@@ -24,6 +24,7 @@ lazy val consoleSubProject =
       )
         .mkString(";")
     )
+    .enablePublishing
 
 lazy val storage =
   module("storage")
