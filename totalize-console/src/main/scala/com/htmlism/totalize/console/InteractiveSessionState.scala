@@ -149,6 +149,7 @@ object InteractiveSessionState:
         lines = prefs
           .xs
           .values
+          .filter(edge => population.contains(edge.pair.x) && population.contains(edge.pair.y))
           .toList
           .map:
             case PartialOrder.Edge(Pair(x, y), rel) =>
