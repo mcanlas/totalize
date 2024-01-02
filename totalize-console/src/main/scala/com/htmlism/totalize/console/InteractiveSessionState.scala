@@ -194,8 +194,10 @@ object InteractiveSessionState:
         _ <- withScores
           .sortBy(_._2)
           .takeRight(3)
-          .traverse: idx =>
-            out.println(idx.toString) *> out.println("")
+          .traverse: (idx, score) =>
+            out.println(s"Score: $score") *>
+              idx.xs.traverse_(out.println) *>
+              out.println("")
       yield ()
 
   def sync[F[_]: Sync: std.Console, A: Order: Decoder: Encoder](
