@@ -82,12 +82,23 @@ object InteractiveSessionState:
 
     def getCurrentPair: F[Pair[A]] =
       for
-        shuffler <- seedRef
-          .get
-          .flatMap(std.Random.scalaUtilRandomSeedInt[F])
+//        shuffler <- seedRef
+//          .get
+//          .flatMap(std.Random.scalaUtilRandomSeedInt[F])
 
-        x <- shuffler.elementOf(population)
-        y <- shuffler.elementOf(population diff List(x))
+        prefs <- prefRef.get
+
+//        _ = prefs.xs.keys.foreach(println)
+
+        sorted = population
+          .fproduct(x => prefs.xs.keys.toList.flatMap(p => List(p.x, p.y)).count(_ == x))
+          .sortBy(_._2)
+
+//        _ = sorted.foreach(println)
+
+        List(x, y) = sorted
+          .map(_._1)
+          .take(2)
 
         pair <- Pair.from(x, y).liftTo[F]
       yield pair
