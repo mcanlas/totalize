@@ -9,7 +9,7 @@ object TotalIndexFitness:
     prefs
       .xs
       .map:
-        case (Pair(x, y), pref) =>
+        case (Pair(x, y), PartialOrder.Edge(_, pref)) =>
           if util.Try(order.lt(x, y)).getOrElse(false) && pref == BinaryPreference.First then 1
           else if util.Try(order.lt(y, x)).getOrElse(false) && pref == BinaryPreference.Second then 1
           else 0
