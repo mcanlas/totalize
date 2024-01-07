@@ -13,6 +13,13 @@ object DependenciesPlugin extends AutoPlugin {
       def withEffectMonad: Project =
         p.settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.5.2")
 
+      def withLogging: Project =
+        p.settings(
+          libraryDependencies ++= Seq(
+            "org.typelevel" %% "log4cats-slf4j" % "2.6.0"
+          )
+        )
+
       def withYaml: Project =
         p.settings(
           libraryDependencies ++= Seq(

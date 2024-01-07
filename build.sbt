@@ -12,6 +12,7 @@ lazy val core =
 lazy val consoleSubProject =
   module("console")
     .withEffectMonad
+    .withLogging
     .withTesting
     .settings(description := "Tools for refining preferences using the Scala console")
     .dependsOn(core, storage)
