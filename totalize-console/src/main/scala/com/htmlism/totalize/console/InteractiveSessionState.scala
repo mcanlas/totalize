@@ -1,5 +1,7 @@
 package com.htmlism.totalize.console
 
+import scala.util.chaining.*
+
 import cats.effect.*
 import cats.syntax.all.*
 import cats.{PartialOrder as _, *}
@@ -90,17 +92,36 @@ object InteractiveSessionState:
 
 //        _ = prefs.xs.keys.foreach(println)
 
-        sorted = population
-          .fproduct(x => prefs.xs.keys.toList.flatMap(p => List(p.x, p.y)).count(_ == x))
-          .sortBy(_._2)
+        xToYs = prefs
+          .xs
+          .keys
+          .toList
+          .flatMap(p =>
+            List(
+              p.x -> p.y,
+              p.y -> p.x
+            )
+          )
+          .groupBy(_._1)
+
+//        sorted = population
+//          .fproduct(x => prefs.xs.keys.toList.flatMap(p => List(p.x, p.y)).count(_ == x))
+//          .sortBy(_._2)
 
 //        _ = sorted.foreach(println)
 
-        x = sorted
-          .map(_._1)
-          .head
+        x <- shuffler.elementOf(population)
 
-        y <- shuffler.elementOf(population diff List(x))
+        // TODO this is actually fallible when the pairs are full; in that case we should just go back to selecting random
+        y <- shuffler.elementOf(population diff xToYs.getOrElse(x, Nil))
+
+//        List(x, y) <- sorted
+//          .map(_._1)
+//          .take(3)
+//          .pipe(shuffler.shuffleList)
+//          .map(_.take(2))
+
+//        y <- shuffler.elementOf(population diff List(x))
 
         pair <- Pair.from(x, y).liftTo[F]
       yield pair
