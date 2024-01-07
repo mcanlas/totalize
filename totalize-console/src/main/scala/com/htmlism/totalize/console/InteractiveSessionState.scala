@@ -112,8 +112,12 @@ object InteractiveSessionState:
 
         x <- shuffler.elementOf(population)
 
+        yCandidates = population diff (x :: xToYs.getOrElse(x, Nil))
+//        _ = println(x)
+//        _ = yCandidates.foreach(println)
+
         // TODO this is actually fallible when the pairs are full; in that case we should just go back to selecting random
-        y <- shuffler.elementOf(population diff xToYs.getOrElse(x, Nil))
+        y <- shuffler.elementOf(yCandidates)
 
 //        List(x, y) <- sorted
 //          .map(_._1)
