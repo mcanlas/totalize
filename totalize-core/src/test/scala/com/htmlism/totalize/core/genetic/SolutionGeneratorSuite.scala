@@ -9,7 +9,7 @@ object SolutionGeneratorSuite extends SimpleIOSuite with Checkers:
   val genSize =
     Gen.choose(0, 100)
 
-  test("A generator can generate a collection of N, in sequence"):
+  test("A solution generator can generate a collection of N, in sequence"):
     forall(genSize): n =>
       for
         rng <- std.Random.scalaUtilRandom[IO]
@@ -19,7 +19,7 @@ object SolutionGeneratorSuite extends SimpleIOSuite with Checkers:
         xs.length
       )
 
-  test("A generator can generate a collection of N, in parallel"):
+  test("A solution generator can generate a collection of N, in parallel"):
     forall(genSize): n =>
       for
         rng <- std.Random.scalaUtilRandom[IO]
