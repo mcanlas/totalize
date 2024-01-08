@@ -5,6 +5,7 @@ lazy val root =
 lazy val core =
   module("core")
     .withCats
+    .withEffectMonad
     .withTesting
     .settings(description := "A framework for generating total orderings")
     .enablePublishing
