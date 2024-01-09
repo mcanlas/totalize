@@ -13,7 +13,7 @@ object SolutionGeneratorSuite extends SimpleIOSuite with Checkers:
     forall(genSize): n =>
       for
         rng <- std.Random.scalaUtilRandom[IO]
-        xs  <- SolutionGenerator.sync[IO](rng).generate(n)
+        xs  <- SolutionGenerator.sequence[IO](rng).generate(n)
       yield expect.eql(
         n,
         xs.length

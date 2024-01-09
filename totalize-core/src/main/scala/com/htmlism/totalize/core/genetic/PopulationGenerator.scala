@@ -7,7 +7,7 @@ trait PopulationGenerator[F[_]]:
   def generate[A](n: Int, fa: F[A]): F[Population[A]]
 
 object PopulationGenerator:
-  def sync[F[_]: Applicative]: PopulationGenerator[F] =
+  def sequence[F[_]: Applicative]: PopulationGenerator[F] =
     new PopulationGenerator[F]:
       def generate[A](n: Int, fa: F[A]): F[Population[A]] =
         Vector

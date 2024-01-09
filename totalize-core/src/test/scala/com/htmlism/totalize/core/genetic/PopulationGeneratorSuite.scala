@@ -14,7 +14,7 @@ object PopulationGeneratorSuite extends SimpleIOSuite with Checkers:
 
   test("A population generator can generate a collection of N, in sequence"):
     forall(genSize): n =>
-      for xs <- PopulationGenerator.sync[IO].generate(n, fa)
+      for xs <- PopulationGenerator.sequence[IO].generate(n, fa)
       yield expect.eql(
         n,
         xs.length
