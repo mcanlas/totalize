@@ -13,5 +13,10 @@ trait SolutionDecoder[A, B]:
 
 class TotalIndexDecoder(ids: List[String]) extends SolutionDecoder[Array[Int], List[String]]:
   def decode(xs: Array[Int]): Either[String, List[String]] =
-    if xs.length == ids.length then Nil.asRight
+    if xs.length == ids.length then
+      ids
+        .zip(xs)
+        .sortBy(_._2)
+        .map(_._1)
+        .asRight
     else s"Input length ${xs.length} does not match population length ${ids.length}".asLeft
