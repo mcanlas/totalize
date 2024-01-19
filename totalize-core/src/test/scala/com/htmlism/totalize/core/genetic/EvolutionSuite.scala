@@ -1,4 +1,5 @@
-package com.htmlism.totalize.core.genetic
+package com.htmlism.totalize.core
+package genetic
 
 import cats.effect.*
 import org.scalacheck.Gen
@@ -9,16 +10,30 @@ object EvolutionSuite extends SimpleIOSuite with Checkers:
   val genNonZeroSize =
     Gen.choose(1, 100)
 
+  val keys =
+    List("alpha", "beta", "gamma")
+
+  val solutionLength =
+    keys.length
+
+  val prefs =
+    PartialOrder
+      .empty
+      .withPreference(Pair("alpha", "beta"), BinaryPreference.First)
+      .withPreference(Pair("alpha", "gamma"), BinaryPreference.First)
+
   test("Evolution takes a population and builds a new population, sequentially"):
     forall(
       for
         x <- genNonZeroSize
         y <- genNonZeroSize
-        z <- genNonZeroSize
-      yield (x, y, z)
-    ): (solutionLength, firstPopSize, nextPopSize) =>
+      yield (x, y)
+    ): (firstPopSize, nextPopSize) =>
       for
         rng <- cats.effect.std.Random.scalaUtilRandom
+
+        given Fitness[Array[Int], Int] =
+          Fitness.ArrayInt(keys, prefs)
 
         given Crossover[IO, Array[Int]] =
           Crossover.Blend[IO](rng)
@@ -40,11 +55,13 @@ object EvolutionSuite extends SimpleIOSuite with Checkers:
       for
         x <- genNonZeroSize
         y <- genNonZeroSize
-        z <- genNonZeroSize
-      yield (x, y, z)
-    ): (solutionLength, firstPopSize, nextPopSize) =>
+      yield (x, y)
+    ): (firstPopSize, nextPopSize) =>
       for
         rng <- cats.effect.std.Random.scalaUtilRandom
+
+        given Fitness[Array[Int], Int] =
+          Fitness.ArrayInt(keys, prefs)
 
         given Crossover[IO, Array[Int]] =
           Crossover.Blend[IO](rng)
