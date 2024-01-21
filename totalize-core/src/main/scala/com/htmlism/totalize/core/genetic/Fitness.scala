@@ -14,7 +14,7 @@ trait Fitness[A, B](using B: Ordering[B]):
     else y
 
 object Fitness:
-  class ArrayInt(keys: List[String], prefs: PartialOrder[String]) extends Fitness[Array[Int], Int]:
+  class ArrayInt[A](keys: List[A], prefs: PartialOrder[A]) extends Fitness[Array[Int], Int]:
     def fitness(ranks: Array[Int]): Int =
       assert(keys.length == ranks.length)
 

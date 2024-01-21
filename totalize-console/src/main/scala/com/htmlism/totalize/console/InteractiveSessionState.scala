@@ -9,6 +9,7 @@ import io.circe.*
 import io.circe.syntax.*
 
 import com.htmlism.totalize.core.*
+import com.htmlism.totalize.core.genetic.*
 import com.htmlism.totalize.storage
 import com.htmlism.totalize.storage.FileIO
 import com.htmlism.totalize.storage.HistoricalEntry
@@ -211,18 +212,42 @@ object InteractiveSessionState:
     def runTournament: F[Unit] =
       for
         prefs <- prefRef.get
+        rng   <- std.Random.scalaUtilRandom[F]
 
-        is <- TotalIndexGenerator.generateN[F, A](rng.shuffleList, population, prefs.xs.size * 2)
+        ff: Fitness[Array[Int], Int] =
+          Fitness.ArrayInt(population, prefs)
 
-        withScores = is.fproduct(idx => TotalIndexFitness.score(idx, prefs))
+        given Fitness[Array[Int], Int] = ff
 
-        _ <- withScores
+        given Crossover[F, Array[Int]] =
+          Crossover.Blend[F](rng)
+
+        given Mutation[F, Array[Int]] =
+          Mutation.ArrayInt[F](rng)
+
+        solGen = SolutionGenerator.sequence[F](rng).generate(population.length)
+        pop <- PopulationGenerator
+          .sequence[F]
+          .generate(1000, solGen)
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, 100, rng))
+
+        _ = println("scores:")
+        _ = pop.map(ff.fitness).sorted.foreach(println)
+
+        bestSolution = pop.maxBy(ff.fitness)
+
+        orderedPopulation = population
+          .zip(bestSolution)
           .sortBy(_._2)
-          .takeRight(3)
-          .traverse: (idx, score) =>
-            out.println(s"Score: $score") *>
-              idx.xs.traverse_(out.println) *>
-              out.println("")
+
+        _ = orderedPopulation.foreach(println)
       yield ()
 
   def sync[F[_]: Sync: std.Console, A: Order: Decoder: Encoder](
