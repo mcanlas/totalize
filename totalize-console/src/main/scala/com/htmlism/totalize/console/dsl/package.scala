@@ -4,6 +4,8 @@ import cats.Order
 import cats.effect.IO
 import io.circe.*
 
+import com.htmlism.totalize.core.genetic.GeneticConfig
+
 package object dsl:
   val states: List[String] = List(
     "Alabama",
@@ -61,11 +63,11 @@ package object dsl:
   val planets: List[String] =
     List("Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
-  def session[A: Order: Encoder: Decoder](xs: List[A], path: String, pumlPath: String)(using
-      cats.effect.unsafe.IORuntime
+  def session[A: Order: Encoder: Decoder](xs: List[A], path: String, pumlPath: String, geneticConfig: GeneticConfig)(
+      using cats.effect.unsafe.IORuntime
   ): InteractiveSessionState[IO, A] =
     InteractiveSessionState
-      .sync[IO, A](xs, path, pumlPath)
+      .sync[IO, A](xs, path, pumlPath, geneticConfig)
       .unsafeRunSync()
 
   def ask[A](using S: InteractiveSessionState[IO, A], R: cats.effect.unsafe.IORuntime): Unit =

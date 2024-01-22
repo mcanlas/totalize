@@ -20,6 +20,7 @@ lazy val consoleSubProject =
     .settings(
       console / initialCommands := Seq(
         "import com.htmlism.totalize.console.*",
+        "import com.htmlism.totalize.core.genetic.*",
         "import com.htmlism.totalize.console.dsl.*",
         "import cats.effect.*",
         "import cats.effect.unsafe.implicits.global"

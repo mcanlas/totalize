@@ -75,7 +75,8 @@ object InteractiveSessionState:
       seedRef: Ref[F, Int],
       prefRef: Ref[F, PartialOrder[A]],
       historicalEdges: Ref[F, List[HistoricalEntry[PartialOrder.Edge[A]]]],
-      storage: YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]]
+      storage: YamlTableService[F, HistoricalEntry[PartialOrder.Edge[A]]],
+      geneticConfig: GeneticConfig
   )(using out: std.Console[F])
       extends InteractiveSessionState[F, A]:
     assert(population.size > 1, "Population must be at least 2")
@@ -228,15 +229,15 @@ object InteractiveSessionState:
         solGen = SolutionGenerator.sequence[F](rng).generate(population.length)
         pop <- PopulationGenerator
           .sequence[F]
-          .generate(1000, solGen)
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 1000, rng))
-          .flatMap(xs => Evolution.evolveSequence(xs, 100, rng))
+          .generate(geneticConfig.firstPopulationSize, solGen)
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
+          .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))
 
         _ = println("scores:")
         _ = pop.map(ff.fitness).sorted.foreach(println)
@@ -253,7 +254,8 @@ object InteractiveSessionState:
   def sync[F[_]: Sync: std.Console, A: Order: Decoder: Encoder](
       population: List[A],
       historicalPath: String,
-      pumlPath: String
+      pumlPath: String,
+      geneticConfig: GeneticConfig
   ): F[InteractiveSessionState[F, A]] =
     for
       rng       <- std.Random.scalaUtilRandom[F]
@@ -280,7 +282,16 @@ object InteractiveSessionState:
             PartialOrder.empty.withPreference(a, b)
           .combineAll
 
-      state = SyncInteractiveSessionState(pumlPath, population, rng, startSeed, startingPrefs, historicalEdges, yaml)
+      state = SyncInteractiveSessionState(
+        pumlPath,
+        population,
+        rng,
+        startSeed,
+        startingPrefs,
+        historicalEdges,
+        yaml,
+        geneticConfig
+      )
 
       _ <- state.updateSeed
     yield state
