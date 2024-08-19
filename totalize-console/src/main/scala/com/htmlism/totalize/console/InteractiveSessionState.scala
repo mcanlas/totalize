@@ -1,7 +1,5 @@
 package com.htmlism.totalize.console
 
-import scala.util.chaining.*
-
 import cats.effect.*
 import cats.syntax.all.*
 import cats.{PartialOrder as _, *}
