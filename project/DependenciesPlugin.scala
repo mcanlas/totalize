@@ -8,7 +8,7 @@ object DependenciesPlugin extends AutoPlugin {
     implicit class DependencyOps(p: Project) {
       def withCats: Project =
         p
-          .settings(libraryDependencies += "org.typelevel" %% "cats-core" % "2.12.0")
+          .settings(libraryDependencies += "org.typelevel" %% "cats-core" % "2.13.0")
 
       def withEffectMonad: Project =
         p.settings(libraryDependencies += "org.typelevel" %% "cats-effect" % "3.6.0-RC2")
