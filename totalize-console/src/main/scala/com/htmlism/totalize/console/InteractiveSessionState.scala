@@ -174,7 +174,7 @@ object InteractiveSessionState:
     def dump: F[Unit] =
       for
         prefs <- prefRef.get
-        _ <- prefs
+        _     <- prefs
           .xs
           .toList
           .map(_.toString)
@@ -184,7 +184,7 @@ object InteractiveSessionState:
     def writePuml: F[Unit] =
       for
         prefs <- prefRef.get
-        lines = prefs
+        lines  = prefs
           .xs
           .values
           .filter(edge => population.contains(edge.pair.x) && population.contains(edge.pair.y))
@@ -225,7 +225,7 @@ object InteractiveSessionState:
           Mutation.ArrayInt[F](rng)
 
         solGen = SolutionGenerator.sequence[F](rng).generate(population.length)
-        pop <- PopulationGenerator
+        pop   <- PopulationGenerator
           .sequence[F]
           .generate(geneticConfig.firstPopulationSize, solGen)
           .flatMap(xs => Evolution.evolveSequence(xs, geneticConfig.populationSize, rng))

@@ -12,7 +12,7 @@ class YamlTableService[F[_]: MonadThrow, A](path: String, R: Reader[F], W: Write
 ):
   def read: F[List[A]] =
     for
-      s <- R.readString(path)
+      s  <- R.readString(path)
       xs <- yaml
         .parser
         .parse(s)
