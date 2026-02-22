@@ -8,7 +8,6 @@ import io.circe.syntax.*
 
 import com.htmlism.totalize.core.*
 import com.htmlism.totalize.core.genetic.*
-import com.htmlism.totalize.storage
 import com.htmlism.totalize.storage.FileIO
 import com.htmlism.totalize.storage.HistoricalEntry
 import com.htmlism.totalize.storage.YamlTableService
