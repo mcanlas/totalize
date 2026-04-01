@@ -7,7 +7,7 @@ import cats.*
   *
   * But it is still possible that queries to its order may not have been in the input population during construction.
   */
-case class TotalIndex[A: Eq](xs: List[A]):
+case class TotalIndex[A](xs: List[A]):
   private lazy val _map =
     xs.iterator.zipWithIndex.toMap
 
