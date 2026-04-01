@@ -239,8 +239,10 @@ object InteractiveSessionState:
         _ = println("scores:")
         _ = pop.map(ff.fitness).sorted.foreach(println)
 
-        bestSolution = pop.maxBy(ff.fitness)
+        bestSolution <- pop.maxByOption(ff.fitness).liftTo[F](new Exception("No best solution found in tournament"))
 
+        // bestSolution is an array of indices into a population
+        // when it is zipped, it provides a way to sort the members
         orderedPopulation = population
           .zip(bestSolution)
           .sortBy(_._2)
@@ -272,8 +274,8 @@ object InteractiveSessionState:
         xs
           .groupBy(_.x.pair)
           .view
-          .mapValues(_.maxBy(_.createdAtMillis))
-          .mapValues(_.x.pref)
+          .mapValues(_.maxByOption(_.createdAtMillis))
+          .collect { case (pair, Some(entry)) => pair -> entry.x.pref }
           .toList
           .map: (a, b) =>
             PartialOrder.empty.withPreference(a, b)
